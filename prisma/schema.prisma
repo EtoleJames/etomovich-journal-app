@@ -1,0 +1,91 @@
+// Defines the datasource using PostgreSQL
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL") 
+}
+
+// Generates Prisma Client
+generator client {
+  provider = "prisma-client-js"
+}
+
+// User model: Has this system users.
+model User {
+  id             String         @id @default(uuid())
+  name           String
+  email          String         @unique
+  passwordHash   String         // Store hashed passwords
+  createdAt      DateTime       @default(now())
+
+  journalEntries JournalEntry[]
+  categories     Category[]
+  tags           Tag[]
+  reminders      Reminder[]
+}
+
+// JournalEntry model: Represents a journal entry.
+model JournalEntry {
+  id          String         @id @default(uuid())
+  user        User           @relation(fields: [userId], references: [id])
+  userId      String
+  title       String
+  content     String
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime?      @updatedAt
+  deletedAt   DateTime?      //soft deletes
+
+  categories  EntryCategory[]
+  tags        EntryTag[]
+}
+
+// Category model: Represents a user-defined category for organizing entries.
+model Category {
+  id       String         @id @default(uuid())
+  name     String
+  user     User           @relation(fields: [userId], references: [id])
+  userId   String
+
+  entries  EntryCategory[]
+}
+
+// Join model for JournalEntry <-> Category (Many-to-Many)
+model EntryCategory {
+  id          String       @id @default(uuid())
+  entry       JournalEntry @relation(fields: [entryId], references: [id])
+  entryId     String
+  category    Category     @relation(fields: [categoryId], references: [id])
+  categoryId  String
+
+  @@unique([entryId, categoryId]) // Prevent duplicate associations
+}
+
+// Tag model: Represents a user-defined tag for further categorization.
+model Tag {
+  id       String         @id @default(uuid())
+  name     String
+  user     User           @relation(fields: [userId], references: [id])
+  userId   String
+
+  entries  EntryTag[]
+}
+
+// Join model for JournalEntry <-> Tag (Many-to-Many)
+model EntryTag {
+  id         String         @id @default(uuid())
+  entry      JournalEntry   @relation(fields: [entryId], references: [id])
+  entryId    String
+  tag        Tag            @relation(fields: [tagId], references: [id])
+  tagId      String
+
+  @@unique([entryId, tagId])
+}
+
+// Reminder model: Represents user-set reminders for journaling.
+model Reminder {
+  id           String   @id @default(uuid())
+  user         User     @relation(fields: [userId], references: [id])
+  userId       String
+  reminderTime DateTime // The time when the reminder should trigger
+  frequency    String   // e.g., "daily", "weekly"
+  isActive     Boolean  @default(true)
+}
