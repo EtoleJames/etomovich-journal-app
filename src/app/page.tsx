@@ -1,12 +1,18 @@
 // Home page component
+import Hero from "@/components/Hero";
+import { Metadata } from "next";
+
+// Export metadata using Next.js Metadata API for SEO and page settings
+export const metadata: Metadata = {
+  title: "Etomovich Journal App",
+  description: "A fullstack personal journaling application built with Next.js",
+};
+
+
 export default function HomePage() {
   return (
     <>
-      <main>
-        {/* Main content of the home page */}
-        <h1>Welcome to Etomovich Journal App!</h1>
-        <p>Sign in with your Google account to start journaling.</p>
-      </main>
+      <Hero/>
     </>
   );
 }
