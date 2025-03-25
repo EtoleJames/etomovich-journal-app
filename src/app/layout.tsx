@@ -1,3 +1,4 @@
+import Header from '@/components/Header';
 import './globals.css';
 import { Inter } from 'next/font/google';
 
@@ -13,13 +14,14 @@ export const metadata = {
 // Root layout component
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>){
   return (
     <html lang="en">
       <head />
       <body className={inter.className}>
+        <Header/>
         {children}
       </body>
     </html>
