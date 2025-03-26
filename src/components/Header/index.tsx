@@ -1,6 +1,8 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
+import { signOut, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import ThemeToggler from "./ThemeToggler";
@@ -8,6 +10,8 @@ import menuData from "./menuData";
 
 const Header = () => {
   // Navbar toggle
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [navbarOpen, setNavbarOpen] = useState(false);
   const navbarToggleHandler = () => {
     setNavbarOpen(!navbarOpen);
@@ -34,6 +38,12 @@ const Header = () => {
     } else {
       setOpenIndex(index);
     }
+  };
+
+  // Handle user logout.
+  const handleLogout = async () => {
+    await signOut({ redirect: false });
+    router.push("/sign-in");
   };
 
   const usePathName = usePathname();
@@ -159,18 +169,30 @@ const Header = () => {
                 </nav>
               </div>
               <div className="flex items-center justify-end pr-16 lg:pr-0">
-                <Link
-                  href="/sign-in"
-                  className="hidden px-7 py-3 text-base font-medium text-dark hover:opacity-70 dark:text-white md:block"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  href="/register"
-                  className="ease-in-up shadow-btn hover:shadow-btn-hover hidden rounded-sm bg-primary px-8 py-3 text-base font-medium text-white transition duration-300 hover:bg-opacity-90 md:block md:px-9 lg:px-6 xl:px-9"
-                >
-                  Register
-                </Link>
+                {!session ? (
+                  <>
+                    <Link
+                      href="/sign-in"
+                      className="hidden px-7 py-3 text-base font-medium text-dark hover:opacity-70 dark:text-white md:block"
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      href="/register"
+                      className="ease-in-up shadow-btn hover:shadow-btn-hover hidden rounded-sm bg-primary px-8 py-3 text-base font-medium text-white transition duration-300 hover:bg-opacity-90 md:block md:px-9 lg:px-6 xl:px-9"
+                    >
+                      Register
+                    </Link>
+                  </>
+                ) : (<>
+                  <button
+                    onClick={handleLogout}
+                    className="ease-in-up shadow-btn hover:shadow-btn-hover hidden rounded-sm bg-red-400 px-8 py-3 text-base font-medium text-white transition duration-300 hover:bg-opacity-90 md:block md:px-9 lg:px-6 xl:px-9"
+                  >
+                    Logout
+                  </button>
+                </>)}
+                
                 <div>
                   <ThemeToggler />
                 </div>

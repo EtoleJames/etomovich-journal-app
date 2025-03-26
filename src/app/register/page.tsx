@@ -1,29 +1,67 @@
 "use client";
 
 import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Head from "next/head";
 import Link from "next/link";
 import { useState } from "react";
 
 export default function RegisterPage() {
-  const [formData, setFormData] = useState({ name: "", email: "", password: "" });
-  const [message, setMessage] = useState("");
+  const router = useRouter();
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Handle registration form submission.
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    setMessage(null);
 
-    const res = await fetch("/api/register", { 
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
+    // Basic validation.
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
 
-    const data = await res.json();
-    setMessage(data.message || data.error);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Registration failed.");
+      }
+
+      setMessage("Registration successful! Please sign in.");
+      // Redirect to sign in page after a short delay.
+      setTimeout(() => {
+        router.push("/sign-in");
+      }, 1500);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Handler for Google sign-in
@@ -86,6 +124,17 @@ export default function RegisterPage() {
                   Sign in with Google
                 </button>
 
+                {error && (
+                  <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <strong className="font-bold">Error&nbsp;&nbsp;</strong>
+                    <span className="block sm:inline">{error}</span>
+                    <span className="absolute top-0 bottom-0 right-0 px-4 py-3">
+                      <svg className="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                      onClick={()=> setError(null)}><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
+                    </span>
+                  </div>
+                )}
+
                 <div className="mb-8 flex items-center justify-center">
                   <span className="hidden h-[1px] w-full max-w-[60px] bg-body-color/50 sm:block"></span>
                   <p className="w-full px-5 text-center text-base font-medium text-body-color">
@@ -136,6 +185,20 @@ export default function RegisterPage() {
                       className="border-stroke dark:text-body-color-dark dark:shadow-two w-full rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:focus:border-primary dark:focus:shadow-none"
                     />
                   </div>
+                  <div className="mb-8">
+                    <label
+                      htmlFor="confirmPassword"
+                      className="mb-3 block text-sm text-dark dark:text-white"
+                    >
+                      {" "}
+                      Confirm Password{" "}
+                    </label>
+                    <input
+                      type="password" name="confirmPassword" onChange={handleChange} required
+                      placeholder="Confirm your Password"
+                      className="border-stroke dark:text-body-color-dark dark:shadow-two w-full rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:focus:border-primary dark:focus:shadow-none"
+                    />
+                  </div>
                   <div className="mb-8 flex">
                     <label
                       htmlFor="checkboxLabel"
@@ -157,7 +220,7 @@ export default function RegisterPage() {
                   </div>
                   <div className="mb-6">
                     <button type="submit" className="shadow-submit dark:shadow-submit-dark flex w-full items-center justify-center rounded-sm bg-primary px-9 py-4 text-base font-medium text-white duration-300 hover:bg-primary/90">
-                      Sign up
+                    {loading ? "Registering..." : "Register"}
                     </button>
                   </div>
                 </form>

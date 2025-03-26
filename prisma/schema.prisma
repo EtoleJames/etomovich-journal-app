@@ -20,6 +20,8 @@ model User {
   email          String         @unique
   password_hash  String
   created_at     DateTime       @default(now())
+  resetToken       String?        //password reset
+  resetTokenExpiry DateTime?      //password reset
   
   // Relations
   journalEntries JournalEntry[]

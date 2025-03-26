@@ -49,10 +49,26 @@ export const authOptions = {
   pages: {
     signIn: "/sign-in", // Custom sign in page
   },
+  callbacks: {
+    async redirect({ url, baseUrl }: { url: string; baseUrl: string }): Promise<string> {
+      return baseUrl;
+    },
+  },
   session: {
     strategy: "jwt" as const,
   },
   secret: process.env.NEXTAUTH_SECRET,
+  cookies: {
+    state: {
+      name: "next-auth.state-token",
+      options: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+      },
+    },
+  },
 };
 
 const handler = NextAuth(authOptions);
