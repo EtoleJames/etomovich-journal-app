@@ -1,12 +1,14 @@
 "use client";
 
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Head from "next/head";
 import Link from "next/link";
 import { useState } from "react";
+import Loader from "@/components/Loader";
 
 export default function RegisterPage() {
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
@@ -17,6 +19,17 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // If session is loading, show a loading indicator.
+  if (status === "loading") {
+    return <Loader/>;
+  }
+
+  // If session is found, redirect to dashboard.
+  if (session) {
+    router.push("/dashboard");
+    return null;
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

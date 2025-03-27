@@ -1,4 +1,4 @@
-import NextAuth from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
@@ -10,7 +10,7 @@ import prisma from "@/lib/prisma";
  * - GoogleProvider handles social login.
  * - CredentialsProvider handles email/password authentication.
  */
-export const authOptions = {
+export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     // Google Provider: uses environment variables for client credentials.
@@ -47,11 +47,20 @@ export const authOptions = {
     }),
   ],
   pages: {
-    signIn: "/sign-in", // Custom sign in page
+    signIn: "/sign-in", // Custom sign in page.
   },
   callbacks: {
-    async redirect({ url, baseUrl }: { url: string; baseUrl: string }): Promise<string> {
-      return baseUrl;
+    async jwt({ token, user }): Promise<any> {
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
+    },
+    async session({ session, token }): Promise<any> {
+      if (token && session.user) {
+        session.user.id = token.id as string;
+      }
+      return session;
     },
   },
   session: {

@@ -1,17 +1,30 @@
 "use client";
 
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Head from "next/head";
+import Loader from "@/components/Loader";
 
 export default function SignInPage() {
   // State for credentials form
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState("");
+  const { data: session, status } = useSession();
   const router = useRouter();
+
+  // If session is loading, show a loading indicator.
+  if (status === "loading") {
+    return <Loader/>;
+  }
+  
+  // If session is found, redirect to dashboard.
+  if (session) {
+    router.push("/dashboard");
+    return null;
+  }
 
   // Handler for updating form fields
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

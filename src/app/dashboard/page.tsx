@@ -1,6 +1,8 @@
 "use client";
 
-import { signOut, useSession } from "next-auth/react";
+import Loader from "@/components/Loader";
+import { useSession } from "next-auth/react";
+import Head from "next/head";
 import { useRouter } from "next/navigation";
 
 /**
@@ -13,7 +15,7 @@ export default function DashboardPage() {
 
   // If session is loading, show a loading indicator.
   if (status === "loading") {
-    return <p className="p-4">Loading...</p>;
+    return <Loader/>;
   }
 
   // If no session is found, redirect to sign-in.
@@ -22,24 +24,23 @@ export default function DashboardPage() {
     return null;
   }
 
-  // Handle user logout.
-  const handleLogout = async () => {
-    await signOut({ redirect: false });
-    router.push("/sign-in");
-  };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
-        <div className="p-4">
+    <>
+      {/* Metadata */}
+      <Head>
+        <title>Dashboard - Etomovich Journals</title>
+        <meta name="description" content="Etomovich Journals Dashboard" />
+      </Head>
+      <section className="relative z-10 overflow-hidden pb-16 pt-36 md:pb-20 lg:pb-28 lg:pt-[180px]">
+        <div className="container">
+          <div className="p-4">
             <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
             <p>Welcome, {session.user?.name || session.user?.email}!</p>
-            <button
-                onClick={handleLogout}
-                className="mt-4 px-4 py-2 rounded-md bg-red-500 text-white hover:bg-red-600 transition-colors"
-            >
-                Logout
-            </button>
+          </div>
         </div>
-    </div>
+      </section>
+    </>
+
   );
 }
