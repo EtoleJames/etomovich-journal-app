@@ -74,7 +74,7 @@ export default function JournalDetailPage() {
                         </Link>
                     ))}
                 </div>
-            </div>
+        </div>
         </div> 
     </section>
     
