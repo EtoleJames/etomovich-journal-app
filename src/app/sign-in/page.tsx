@@ -1,7 +1,7 @@
 "use client";
 
 import { signIn, useSession } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Head from "next/head";
@@ -17,14 +17,15 @@ export default function SignInPage() {
 
   // If session is loading, show a loading indicator.
   if (status === "loading") {
-    return <Loader/>;
+    return <Loader />;
   }
-  
-  // If session is found, redirect to dashboard.
-  if (session) {
-    router.push("/dashboard");
-    return null;
-  }
+
+  // Redirect to dashboard if session exists.
+  useEffect(() => {
+    if (session) {
+      router.push("/dashboard");
+    }
+  }, [session, router]);
 
   // Handler for updating form fields
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,10 +63,12 @@ export default function SignInPage() {
 
   return (
     <>
-      {/* Metadata */}
       <Head>
         <title>Sign In - Etomovich Journals</title>
-        <meta name="description" content="Sign in to your Etomovich Journals account to access and manage your journals efficiently." />
+        <meta
+          name="description"
+          content="Sign in to your Etomovich Journals account to access and manage your journals efficiently."
+        />
       </Head>
       <section className="relative z-10 overflow-hidden pb-16 pt-36 md:pb-20 lg:pb-28 lg:pt-[180px]">
         <div className="container">
@@ -78,7 +81,10 @@ export default function SignInPage() {
                 <p className="mb-11 text-center text-base font-medium text-body-color">
                   Login to your account for a faster checkout.
                 </p>
-                <button onClick={handleGoogleSignIn} className="border-stroke dark:text-body-color-dark dark:shadow-two mb-6 flex w-full items-center justify-center rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 hover:border-primary hover:bg-primary/5 hover:text-primary dark:border-transparent dark:bg-[#2C303B] dark:hover:border-primary dark:hover:bg-primary/5 dark:hover:text-primary dark:hover:shadow-none">
+                <button
+                  onClick={handleGoogleSignIn}
+                  className="border-stroke dark:text-body-color-dark dark:shadow-two mb-6 flex w-full items-center justify-center rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 hover:border-primary hover:bg-primary/5 hover:text-primary dark:border-transparent dark:bg-[#2C303B] dark:hover:border-primary dark:hover:bg-primary/5 dark:hover:text-primary dark:hover:shadow-none"
+                >
                   <span className="mr-3">
                     <svg
                       width="20"
@@ -116,12 +122,23 @@ export default function SignInPage() {
                 </button>
 
                 {error && (
-                  <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                  <div
+                    className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+                    role="alert"
+                  >
                     <strong className="font-bold">Error&nbsp;&nbsp;</strong>
                     <span className="block sm:inline">{error}</span>
                     <span className="absolute top-0 bottom-0 right-0 px-4 py-3">
-                      <svg className="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                      onClick={()=> setError('')}><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
+                      <svg
+                        className="fill-current h-6 w-6 text-red-500"
+                        role="button"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        onClick={() => setError("")}
+                      >
+                        <title>Close</title>
+                        <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z" />
+                      </svg>
                     </span>
                   </div>
                 )}
@@ -213,7 +230,10 @@ export default function SignInPage() {
                     </div>
                   </div>
                   <div className="mb-6">
-                    <button type="submit" className="shadow-submit dark:shadow-submit-dark flex w-full items-center justify-center rounded-sm bg-primary px-9 py-4 text-base font-medium text-white duration-300 hover:bg-primary/90">
+                    <button
+                      type="submit"
+                      className="shadow-submit dark:shadow-submit-dark flex w-full items-center justify-center rounded-sm bg-primary px-9 py-4 text-base font-medium text-white duration-300 hover:bg-primary/90"
+                    >
                       Sign in
                     </button>
                   </div>
