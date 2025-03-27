@@ -3,20 +3,22 @@ import prisma from "@/lib/prisma";
 
 /**
  * GET /api/journal/[id]
- * Retrieves a single journal entry by its ID.
+ * Retrieves a single journal entry by its ID (if not soft-deleted).
+ * Includes nested category and tag details.
  */
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, context: { params: { id: string } }) {
+  const { id } = await Promise.resolve(context.params);
   try {
-    const { id } = params;
     const entry = await prisma.journalEntry.findUnique({
       where: { id },
+      include: {
+        entryCategories: { include: { category: true } },
+        entryTags: { include: { tag: true } },
+      },
     });
-
-    // Return 404 if entry does not exist or is soft-deleted
     if (!entry || entry.deleted_at !== null) {
       return NextResponse.json({ error: "Entry not found" }, { status: 404 });
     }
-
     return NextResponse.json(entry);
   } catch (error) {
     console.error("Error fetching journal entry:", error);
@@ -26,22 +28,32 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
 /**
  * PUT /api/journal/[id]
- * Updates a journal entry.
- * Expected JSON payload: { title, content }
+ * Updates a journal entry and its associated categories and tags.
+ * Expects JSON: { title, content, categoryIds: string[], tagIds: string[] }
  */
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, context: { params: { id: string } }) {
+  const { id } = await Promise.resolve(context.params);
   try {
-    const { id } = params;
-    const data = await req.json();
-
+    const { title, content, categoryIds, tagIds } = await req.json();
     const updatedEntry = await prisma.journalEntry.update({
       where: { id },
       data: {
-        title: data.title,
-        content: data.content,
+        title,
+        content,
+        entryCategories: {
+          deleteMany: {},
+          create: categoryIds.map((cid: string) => ({ category_id: cid })),
+        },
+        entryTags: {
+          deleteMany: {},
+          create: tagIds.map((tid: string) => ({ tag_id: tid })),
+        },
+      },
+      include: {
+        entryCategories: { include: { category: true } },
+        entryTags: { include: { tag: true } },
       },
     });
-
     return NextResponse.json(updatedEntry);
   } catch (error) {
     console.error("Error updating journal entry:", error);
@@ -51,19 +63,15 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
 /**
  * DELETE /api/journal/[id]
- * Soft deletes a journal entry by setting its deleted_at timestamp.
+ * Soft-deletes a journal entry by setting its deleted_at field.
  */
 export async function DELETE(req: Request, context: { params: { id: string } }) {
   const { id } = await Promise.resolve(context.params);
-  
   try {
     const deletedEntry = await prisma.journalEntry.update({
       where: { id },
-      data: {
-        deleted_at: new Date(),
-      },
+      data: { deleted_at: new Date() },
     });
-
     return NextResponse.json({ message: "Entry deleted", entry: deletedEntry });
   } catch (error) {
     console.error("Error deleting journal entry:", error);

@@ -1,8 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// Learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
@@ -15,19 +11,19 @@ datasource db {
 
 // User model: represents an application user
 model User {
-  id             String         @id @default(uuid())
-  name           String
-  email          String         @unique
-  password_hash  String
-  created_at     DateTime       @default(now())
-  resetToken       String?        //password reset
-  resetTokenExpiry DateTime?      //password reset
+  id              String         @id @default(uuid())
+  name            String
+  email           String         @unique
+  password_hash   String
+  created_at      DateTime       @default(now())
+  resetToken      String?        // For password reset functionality
+  resetTokenExpiry DateTime?       // Expiry time for the password reset token
   
   // Relations
-  journalEntries JournalEntry[]
-  categories     Category[]
-  tags           Tag[]
-  reminders      Reminder[]
+  journalEntries  JournalEntry[]
+  categories      Category[]
+  tags            Tag[]
+  reminders       Reminder[]
 }
 
 // JournalEntry model: represents a journal entry created by a user
@@ -38,19 +34,19 @@ model JournalEntry {
   content    String
   created_at DateTime       @default(now())
   updated_at DateTime       @updatedAt
-  deleted_at DateTime?      // Soft delete, nullable
+  deleted_at DateTime?      // For soft deletes; nullable means entry is active if null
   
   // Relations
-  user         User          @relation(fields: [user_id], references: [id])
-  entryCategories EntryCategory[]
-  entryTags       EntryTag[]
+  user             User          @relation(fields: [user_id], references: [id])
+  entryCategories  EntryCategory[]
+  entryTags        EntryTag[]
 }
 
 // Category model: used to categorize journal entries
 model Category {
-  id      String   @id @default(uuid())
-  name    String
-  user_id String
+  id              String         @id @default(uuid())
+  name            String
+  user_id         String
   
   // Relations
   user            User           @relation(fields: [user_id], references: [id])
@@ -64,8 +60,8 @@ model EntryCategory {
   category_id String
   
   // Relations
-  journalEntry JournalEntry  @relation(fields: [entry_id], references: [id])
-  category     Category      @relation(fields: [category_id], references: [id])
+  journalEntry  JournalEntry  @relation(fields: [entry_id], references: [id])
+  category      Category      @relation(fields: [category_id], references: [id])
 }
 
 // Tag model: flexible tagging system for journal entries
@@ -94,11 +90,10 @@ model EntryTag {
 model Reminder {
   id            String   @id @default(uuid())
   user_id       String
-  reminder_time DateTime // Using DateTime to store time of day (adjust if needed)
+  reminder_time DateTime // Time for the reminder (can be adjusted as needed)
   frequency     String   // e.g., "daily", "weekly"
   is_active     Boolean  @default(true)
   
   // Relations
   user          User     @relation(fields: [user_id], references: [id])
 }
-
