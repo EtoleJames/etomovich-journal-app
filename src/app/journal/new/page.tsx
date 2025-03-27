@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
@@ -25,19 +25,8 @@ export default function NewEntryPage() {
   const [categories, setCategories] = useState<any[]>([]);
   const [tags, setTags] = useState<any[]>([]);
 
-  // Ensure user is authenticated.
-  useEffect(() => {
-    if (status === "loading") return;
-    if (!session) {
-      router.push("/sign-in");
-    } else {
-      setFormData(prev => ({ ...prev, user_id: session.user.id }));
-      fetchCategories();
-      fetchTags();
-    }
-  }, [session, status, router]);
-
-  const fetchCategories = async () => {
+  // Wrap fetchCategories in useCallback to include it in the dependency array.
+  const fetchCategories = useCallback(async () => {
     try {
       const res = await fetch(`/api/categories?user_id=${session?.user.id}`);
       const data = await res.json();
@@ -45,9 +34,10 @@ export default function NewEntryPage() {
     } catch (err) {
       console.error("Failed to fetch categories");
     }
-  };
+  }, [session?.user.id]);
 
-  const fetchTags = async () => {
+  // Wrap fetchTags in useCallback to include it in the dependency array.
+  const fetchTags = useCallback(async () => {
     try {
       const res = await fetch(`/api/tags?user_id=${session?.user.id}`);
       const data = await res.json();
@@ -55,26 +45,37 @@ export default function NewEntryPage() {
     } catch (err) {
       console.error("Failed to fetch tags");
     }
-  };
+  }, [session?.user.id]);
+
+  useEffect(() => {
+    if (status === "loading") return;
+    if (!session) {
+      router.push("/sign-in");
+    } else {
+      setFormData((prev) => ({ ...prev, user_id: session.user.id }));
+      fetchCategories();
+      fetchTags();
+    }
+  }, [session, status, router, fetchCategories, fetchTags]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const toggleCategory = (id: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       categoryIds: prev.categoryIds.includes(id)
-        ? prev.categoryIds.filter(cid => cid !== id)
+        ? prev.categoryIds.filter((cid) => cid !== id)
         : [...prev.categoryIds, id],
     }));
   };
 
   const toggleTag = (id: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       tagIds: prev.tagIds.includes(id)
-        ? prev.tagIds.filter(tid => tid !== id)
+        ? prev.tagIds.filter((tid) => tid !== id)
         : [...prev.tagIds, id],
     }));
   };
@@ -107,7 +108,7 @@ export default function NewEntryPage() {
         <div className="p-4 max-w-xl mx-auto">
           <h1 className="text-2xl font-bold mb-6">Create New Journal Entry</h1>
           {error && <p className="mb-4 text-red-500">{error}</p>}
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <input
               type="text"
               name="title"
@@ -131,7 +132,7 @@ export default function NewEntryPage() {
                 <p>No categories available. Create one first.</p>
               ) : (
                 <div className="grid grid-cols-2 gap-2">
-                  {categories.map(cat => (
+                  {categories.map((cat) => (
                     <label key={cat.id} className="flex items-center space-x-2">
                       <input
                         type="checkbox"
@@ -149,36 +150,35 @@ export default function NewEntryPage() {
             {/* Tags selection */}
             <div>
               <h2 className="font-semibold mb-2">Select Tags</h2>
-                {tags.length === 0 ? (
-                  <p>No tags available. Create one first.</p>
-                ) : (
-                  <div className="grid grid-cols-2 gap-2">
-                    {tags.map(tag => (
-                      <label key={tag.id} className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          value={tag.id}
-                          checked={formData.tagIds.includes(tag.id)}
-                          onChange={() => toggleTag(tag.id)}
-                        />
-                        <span>{tag.name}</span>
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
+              {tags.length === 0 ? (
+                <p>No tags available. Create one first.</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  {tags.map((tag) => (
+                    <label key={tag.id} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        value={tag.id}
+                        checked={formData.tagIds.includes(tag.id)}
+                        onChange={() => toggleTag(tag.id)}
+                      />
+                      <span>{tag.name}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-2 px-4 rounded bg-green-500 text-white font-medium hover:bg-green-600 transition-colors"
-              >
-                {loading ? "Creating..." : "Create Entry"}
-              </button>
-            </form>
-          </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-2 px-4 rounded bg-green-500 text-white font-medium hover:bg-green-600 transition-colors"
+            >
+              {loading ? "Creating..." : "Create Entry"}
+            </button>
+          </form>
+        </div>
       </div>
     </section>
-    
   );
 }

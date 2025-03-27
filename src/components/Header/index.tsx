@@ -20,6 +20,7 @@ const Header = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
+  const [loading, setLoading] = useState(false);
 
   // Mobile navbar toggle state.
   const [navbarOpen, setNavbarOpen] = useState(false);
@@ -36,7 +37,11 @@ const Header = () => {
 
   // Logout handler.
   const handleLogout = async () => {
-    await signOut({ redirect: false });
+    setLoading(true);
+    const res = await signOut({ redirect: false });
+    if(res){
+      setLoading(false);
+    }
     router.push("/sign-in");
   };
 
@@ -47,7 +52,7 @@ const Header = () => {
         className={
           level === 0
             ? "flex flex-col lg:flex-row lg:space-x-12"
-            : "absolute left-0 top-full hidden min-w-[200px] bg-white p-4 shadow-lg group-hover:block"
+            : "absolute left-0 top-full hidden min-w-[200px] bg-white dark:bg-dark p-4 shadow-lg group-hover:block"
         }
       >
         {items.map((item) => {
@@ -186,9 +191,9 @@ const Header = () => {
                     ) : (
                       <button
                         onClick={handleLogout}
-                        className="ease-in-up shadow-btn hover:shadow-btn-hover hidden rounded-sm bg-red-400 px-8 py-3 text-base font-medium text-white transition duration-300 hover:bg-opacity-90 md:block md:px-9 lg:px-6 xl:px-9"
+                        className="ease-in-up shadow-btn hover:shadow-btn-hover rounded-sm bg-red-400 px-8 py-3 text-base font-medium text-white transition duration-300 hover:bg-opacity-90 md:block md:px-9 lg:px-6 xl:px-9"
                       >
-                        Logout
+                        {loading ? "Logging out.." : "Logout"}
                       </button>
                     )}
                   </>

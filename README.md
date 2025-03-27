@@ -24,6 +24,15 @@ A full-stack personal journaling application built with Next.js, Prisma, NextAut
 
 ## Getting Started
 
+### Deployed project link
+
+Here is the project deployed link [https://etomovich-journal-app.vercel.app/](https://etomovich-journal-app.vercel.app/)
+
+### System design documents
+
+Here is a link where you can get the [system documentation](https://github.com/EtoleJames/etomovich-journal-app/tree/main/docs)
+
+
 ### Prerequisites
 
 Before you begin, ensure you have the following installed:

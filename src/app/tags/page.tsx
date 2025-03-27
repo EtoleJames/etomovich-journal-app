@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -16,6 +16,17 @@ export default function TagListPage() {
   const [newName, setNewName] = useState("");
   const [error, setError] = useState("");
 
+  // Wrap fetchTags in useCallback to stabilize its reference.
+  const fetchTags = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/tags?user_id=${session?.user.id}`);
+      const data = await res.json();
+      setTags(data);
+    } catch (err: any) {
+      setError("Failed to fetch tags.");
+    }
+  }, [session?.user.id]);
+
   useEffect(() => {
     if (status === "loading") return;
     if (!session) {
@@ -23,17 +34,7 @@ export default function TagListPage() {
     } else {
       fetchTags();
     }
-  }, [session, status, router]);
-
-  const fetchTags = async () => {
-    try {
-      const res = await fetch(`/api/tags?user_id=${session?.user.id}`);
-      const data = await res.json();
-      setTags(data);
-    } catch (err) {
-      setError("Failed to fetch tags.");
-    }
-  };
+  }, [session, status, router, fetchTags]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,39 +58,41 @@ export default function TagListPage() {
 
   return (
     <section className="relative z-10 overflow-hidden pb-16 pt-36 md:pb-20 lg:pb-28 lg:pt-[180px]">
-        <div className="container">
-            <div className="p-4 max-w-2xl mx-auto">
-                <h1 className="text-2xl font-bold mb-4">My Tags</h1>
-                {error && <p className="text-red-500 mb-4">{error}</p>}
-                <form onSubmit={handleCreate} className="mb-6 flex gap-2">
-                    <input
-                    type="text"
-                    placeholder="New Tag Name"
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
-                    required
-                    className="border p-2 rounded flex-grow"
-                    />
-                    <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                    Add
+      <div className="container">
+        <div className="p-4 max-w-2xl mx-auto">
+          <h1 className="text-2xl font-bold mb-4">My Tags</h1>
+          {error && <p className="text-red-500 mb-4">{error}</p>}
+          <form onSubmit={handleCreate} className="mb-6 flex gap-2">
+            <input
+              type="text"
+              placeholder="New Tag Name"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              required
+              className="border p-2 rounded flex-grow"
+            />
+            <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+              Add
+            </button>
+          </form>
+          {tags.length === 0 ? (
+            <p>No tags available.</p>
+          ) : (
+            <ul className="space-y-2">
+              {tags.map((tag) => (
+                <li key={tag.id} className="flex justify-between items-center border p-2 rounded">
+                  <span>{tag.name}</span>
+                  <Link href={`/tags/${tag.id}/edit`}>
+                    <button className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600">
+                      Edit
                     </button>
-                </form>
-                {tags.length === 0 ? (
-                    <p>No tags available.</p>
-                ) : (
-                    <ul className="space-y-2">
-                        {tags.map(tag => (
-                            <li key={tag.id} className="flex justify-between items-center border p-2 rounded">
-                            <span>{tag.name}</span>
-                            <Link href={`/tags/${tag.id}/edit`}>
-                                <button className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600">Edit</button>
-                            </Link>
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
+      </div>
     </section>
   );
 }

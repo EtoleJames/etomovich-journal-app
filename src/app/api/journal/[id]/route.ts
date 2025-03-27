@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
@@ -6,11 +8,11 @@ import prisma from "@/lib/prisma";
  * Retrieves a single journal entry by its ID (if not soft-deleted).
  * Includes nested category and tag details.
  */
-export async function GET(req: Request, context: { params: { id: string } }) {
-  const { id } = await Promise.resolve(context.params);
+export async function GET(req: Request, context: any) {
+  const { params } = context;
   try {
     const entry = await prisma.journalEntry.findUnique({
-      where: { id },
+      where: { id: params.id },
       include: {
         entryCategories: { include: { category: true } },
         entryTags: { include: { tag: true } },
@@ -22,7 +24,7 @@ export async function GET(req: Request, context: { params: { id: string } }) {
     return NextResponse.json(entry);
   } catch (error) {
     console.error("Error fetching journal entry:", error);
-    return NextResponse.json({ error: "Error fetching entry" }, { status: 500 });
+    return NextResponse.json({ error: "Error fetching journal entry" }, { status: 500 });
   }
 }
 
@@ -31,7 +33,7 @@ export async function GET(req: Request, context: { params: { id: string } }) {
  * Updates a journal entry and its associated categories and tags.
  * Expects JSON: { title, content, categoryIds: string[], tagIds: string[] }
  */
-export async function PUT(req: Request, context: { params: { id: string } }) {
+export async function PUT(req: Request, context: any) {
   const { id } = await Promise.resolve(context.params);
   try {
     const { title, content, categoryIds, tagIds } = await req.json();
@@ -65,7 +67,7 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
  * DELETE /api/journal/[id]
  * Soft-deletes a journal entry by setting its deleted_at field.
  */
-export async function DELETE(req: Request, context: { params: { id: string } }) {
+export async function DELETE(req: Request, context: any) {
   const { id } = await Promise.resolve(context.params);
   try {
     const deletedEntry = await prisma.journalEntry.update({

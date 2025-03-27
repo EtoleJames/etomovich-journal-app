@@ -6,7 +6,7 @@ Etomovich Journal App is a full-stack journaling application built with Next.js,
 
 ## Architecture Diagram
 
-*(Include your PlantUML diagram or a reference to an image here.)*
+Plant UML Diagram added in the folder. 
 
 ## Components
 
