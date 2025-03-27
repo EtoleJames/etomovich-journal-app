@@ -1,0 +1,67 @@
+@startuml
+entity User {
+    *id : UUID
+    --
+    name : String
+    email : String
+    password_hash : String
+    created_at : Timestamp
+}
+
+entity JournalEntry {
+    *id : UUID
+    --
+    user_id : UUID
+    title : String
+    content : Text
+    created_at : Timestamp
+    updated_at : Timestamp
+    deleted_at : Timestamp?  // For soft deletes
+}
+
+entity Category {
+    *id : UUID
+    --
+    name : String
+    user_id : UUID
+}
+
+entity EntryCategory {
+    *id : UUID
+    --
+    entry_id : UUID
+    category_id : UUID
+}
+
+entity Tag {
+    *id : UUID
+    --
+    name : String
+    user_id : UUID
+}
+
+entity EntryTag {
+    *id : UUID
+    --
+    entry_id : UUID
+    tag_id : UUID
+}
+
+entity Reminder {
+    *id : UUID
+    --
+    user_id : UUID
+    reminder_time : Time
+    frequency : String  // daily, weekly
+    is_active : Boolean
+}
+
+User ||--|{ JournalEntry : "writes"
+User ||--|{ Category : "creates"
+User ||--|{ Tag : "creates"
+User ||--|{ Reminder : "sets"
+JournalEntry ||--|{ EntryCategory : "categorized as"
+Category ||--|{ EntryCategory : "has"
+JournalEntry ||--|{ EntryTag : "tagged as"
+Tag ||--|{ EntryTag : "has"
+@enduml

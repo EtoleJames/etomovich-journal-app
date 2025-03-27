@@ -1,0 +1,99 @@
+// Learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model: represents an application user
+model User {
+  id              String         @id @default(uuid())
+  name            String
+  email           String         @unique
+  password_hash   String
+  created_at      DateTime       @default(now())
+  resetToken      String?        // For password reset functionality
+  resetTokenExpiry DateTime?       // Expiry time for the password reset token
+  
+  // Relations
+  journalEntries  JournalEntry[]
+  categories      Category[]
+  tags            Tag[]
+  reminders       Reminder[]
+}
+
+// JournalEntry model: represents a journal entry created by a user
+model JournalEntry {
+  id         String         @id @default(uuid())
+  user_id    String
+  title      String
+  content    String
+  created_at DateTime       @default(now())
+  updated_at DateTime       @updatedAt
+  deleted_at DateTime?      // For soft deletes; nullable means entry is active if null
+  
+  // Relations
+  user             User          @relation(fields: [user_id], references: [id])
+  entryCategories  EntryCategory[]
+  entryTags        EntryTag[]
+}
+
+// Category model: used to categorize journal entries
+model Category {
+  id              String         @id @default(uuid())
+  name            String
+  user_id         String
+  
+  // Relations
+  user            User           @relation(fields: [user_id], references: [id])
+  entryCategories EntryCategory[]
+}
+
+// Intermediate model for the many-to-many relationship between JournalEntry and Category
+model EntryCategory {
+  id          String        @id @default(uuid())
+  entry_id    String
+  category_id String
+  
+  // Relations
+  journalEntry  JournalEntry  @relation(fields: [entry_id], references: [id])
+  category      Category      @relation(fields: [category_id], references: [id])
+}
+
+// Tag model: flexible tagging system for journal entries
+model Tag {
+  id      String   @id @default(uuid())
+  name    String
+  user_id String
+  
+  // Relations
+  user      User       @relation(fields: [user_id], references: [id])
+  entryTags EntryTag[]
+}
+
+// Intermediate model for the many-to-many relationship between JournalEntry and Tag
+model EntryTag {
+  id       String       @id @default(uuid())
+  entry_id String
+  tag_id   String
+  
+  // Relations
+  journalEntry JournalEntry @relation(fields: [entry_id], references: [id])
+  tag          Tag          @relation(fields: [tag_id], references: [id])
+}
+
+// Reminder model: for user-set reminders
+model Reminder {
+  id            String   @id @default(uuid())
+  user_id       String
+  reminder_time DateTime // Time for the reminder (can be adjusted as needed)
+  frequency     String   // e.g., "daily", "weekly"
+  is_active     Boolean  @default(true)
+  
+  // Relations
+  user          User     @relation(fields: [user_id], references: [id])
+}
