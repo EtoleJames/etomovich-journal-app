@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
@@ -5,7 +7,7 @@ import prisma from "@/lib/prisma";
  * GET /api/tags/[id]/journals
  * Retrieves all journal entries associated with a given tag.
  */
-export async function GET(req: Request, context: { params: { id: string } }) {
+export async function GET(req: Request, context: any) {
   const { id } = await Promise.resolve(context.params);
   try {
     const entries = await prisma.entryTag.findMany({

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
@@ -6,7 +8,7 @@ import prisma from "@/lib/prisma";
  * Updates a tag's name.
  * Expects JSON: { name: string }
  */
-export async function PUT(req: Request, context: { params: { id: string } }) {
+export async function PUT(req: Request, context: any) {
   const { id } = await Promise.resolve(context.params);
   try {
     const { name } = await req.json();
@@ -28,7 +30,7 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
  * DELETE /api/tags/[id]
  * Deletes a tag.
  */
-export async function DELETE(req: Request, context: { params: { id: string } }) {
+export async function DELETE(req: Request, context: any) {
   const { id } = await Promise.resolve(context.params);
   try {
     const deletedTag = await prisma.tag.delete({

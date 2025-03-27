@@ -50,21 +50,21 @@ export default function DashboardPage() {
           {/* Quick Action Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Link href="/journal/new">
-              <div className="cursor-pointer rounded-lg bg-white p-6 shadow hover:shadow-lg transition">
+              <div className="cursor-pointer rounded-lg dark:bg-[#3660d4] p-6 shadow hover:shadow-lg transition">
                 <h2 className="text-xl font-semibold mb-2">New Journal Entry</h2>
-                <p className="text-gray-600">Create a new entry quickly.</p>
+                <p className="text-gray-600 dark:text-black">Create a new entry quickly.</p>
               </div>
             </Link>
             <Link href="/analytics">
-              <div className="cursor-pointer rounded-lg bg-white p-6 shadow hover:shadow-lg transition">
+              <div className="cursor-pointer rounded-lg dark:bg-[#3660d4]  p-6 shadow hover:shadow-lg transition">
                 <h2 className="text-xl font-semibold mb-2">Analytics</h2>
-                <p className="text-gray-600">View insights and trends.</p>
+                <p className="text-gray-600 dark:text-black">View insights and trends.</p>
               </div>
             </Link>
             <Link href="/settings">
-              <div className="cursor-pointer rounded-lg bg-white p-6 shadow hover:shadow-lg transition">
+              <div className="cursor-pointer rounded-lg dark:bg-[#3660d4] p-6 shadow hover:shadow-lg transition">
                 <h2 className="text-xl font-semibold mb-2">Settings</h2>
-                <p className="text-gray-600">Manage your profile.</p>
+                <p className="text-gray-600 dark:text-black">Manage your profile.</p>
               </div>
             </Link>
           </div>
@@ -81,7 +81,7 @@ export default function DashboardPage() {
             ) : (
               <ul className="space-y-4">
                 {recentEntries.map((entry) => (
-                  <li key={entry.id} className="rounded-lg bg-white p-4 shadow hover:shadow-lg transition">
+                  <li key={entry.id} className="rounded-lg p-4 shadow hover:shadow-lg transition">
                     <Link href={`/journal/${entry.id}`}>
                       <h3 className="text-xl font-semibold hover:text-blue-500 cursor-pointer">{entry.title}</h3>
                     </Link>

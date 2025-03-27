@@ -1,4 +1,5 @@
-// src/app/api/ai/analyze/route.ts
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
 
 const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";

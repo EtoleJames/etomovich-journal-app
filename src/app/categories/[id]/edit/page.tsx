@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
@@ -14,16 +14,8 @@ export default function CategoryEditPage() {
   const [name, setName] = useState("");
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (status === "loading") return;
-    if (!session) {
-      router.push("/sign-in");
-    } else {
-      fetchCategory();
-    }
-  }, [session, status, router, id]);
-
-  const fetchCategory = async () => {
+  // Memoize fetchCategory so it doesn't change on every render.
+  const fetchCategory = useCallback(async () => {
     try {
       const res = await fetch(`/api/categories?user_id=${session?.user.id}`);
       const data = await res.json();
@@ -34,7 +26,16 @@ export default function CategoryEditPage() {
     } catch (err: any) {
       setError(err.message);
     }
-  };
+  }, [session?.user.id, id]);
+
+  useEffect(() => {
+    if (status === "loading") return;
+    if (!session) {
+      router.push("/sign-in");
+    } else {
+      fetchCategory();
+    }
+  }, [session, status, router, fetchCategory]);
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,31 +72,37 @@ export default function CategoryEditPage() {
 
   return (
     <section className="relative z-10 overflow-hidden pb-16 pt-36 md:pb-20 lg:pb-28 lg:pt-[180px]">
-        <div className="container">
-            <div className="p-4 max-w-xl mx-auto">
-                <h1 className="text-2xl font-bold mb-4">Edit Category</h1>
-                {error && <p className="text-red-500 mb-4">{error}</p>}
-                <form onSubmit={handleUpdate} className="space-y-4">
-                    <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Category Name"
-                    required
-                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <div className="flex gap-4">
-                    <button type="submit" className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
-                        Update
-                    </button>
-                    <button type="button" onClick={handleDelete} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
-                        Delete
-                    </button>
-                    </div>
-                </form>
+      <div className="container">
+        <div className="p-4 max-w-xl mx-auto">
+          <h1 className="text-2xl font-bold mb-4">Edit Category</h1>
+          {error && <p className="text-red-500 mb-4">{error}</p>}
+          <form onSubmit={handleUpdate} className="space-y-4">
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Category Name"
+              required
+              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <div className="flex gap-4">
+              <button
+                type="submit"
+                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+              >
+                Update
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+              >
+                Delete
+              </button>
             </div>
+          </form>
         </div>
+      </div>
     </section>
-    
   );
 }

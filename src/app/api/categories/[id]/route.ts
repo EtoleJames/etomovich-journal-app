@@ -1,20 +1,22 @@
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 /**
  * PUT /api/categories/[id]
- * Updates a category's name.
- * Expects JSON: { name: string }
+ * Updates a category with the provided name.
+ * Expects JSON payload: { name: string }
  */
-export async function PUT(req: Request, context: { params: { id: string } }) {
-  const { id } = await Promise.resolve(context.params);
+export async function PUT(req: Request, context: any) {
+  const { params } = context;
   try {
     const { name } = await req.json();
     if (!name) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
     const updatedCategory = await prisma.category.update({
-      where: { id },
+      where: { id: params.id },
       data: { name },
     });
     return NextResponse.json(updatedCategory);
@@ -28,11 +30,11 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
  * DELETE /api/categories/[id]
  * Deletes a category.
  */
-export async function DELETE(req: Request, context: { params: { id: string } }) {
-  const { id } = await Promise.resolve(context.params);
+export async function DELETE(req: Request, context: any) {
+  const { params } = context;
   try {
     const deletedCategory = await prisma.category.delete({
-      where: { id },
+      where: { id: params.id },
     });
     return NextResponse.json({ message: "Category deleted", category: deletedCategory });
   } catch (error) {

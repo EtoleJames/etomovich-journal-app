@@ -3,18 +3,6 @@
     "builds": [
       { "src": "next.config.js", "use": "@vercel/next" }
     ],
-    "env": {
-      "DATABASE_URL": "@database_url",
-      "NEXTAUTH_SECRET": "@nextauth_secret",
-      "NEXTAUTH_URL": "https://yourapp.vercel.app",
-      "OPENAI_API_KEY": "@openai_api_key",
-      "SMTP_HOST": "@smtp_host",
-      "SMTP_PORT": "@smtp_port",
-      "SMTP_SECURE": "@smtp_secure",
-      "SMTP_USER": "@smtp_user",
-      "SMTP_PASS": "@smtp_pass",
-      "SMTP_FROM": "@smtp_from"
-    },
     "routes": [
       { "src": "/(.*)", "dest": "/$1" }
     ]
